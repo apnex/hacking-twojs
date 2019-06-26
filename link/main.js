@@ -91,6 +91,21 @@ mygrid.forEach((path) => {
 	}
 });
 
+symbol.scale = 0.20
+symbol.center();
+
+// path1
+let testi = addPath([
+	{x:-18, y:-2},
+	{x:20, y:-2},
+	{x:20, y:-20}
+], {
+	close: 0,
+	radius: 40,
+	start: symbol,
+	end: symbol
+});
+
 // add to main
-main.add(symbol);
+main.add(testi);
 main.center();
