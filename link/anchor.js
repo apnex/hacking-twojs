@@ -206,9 +206,9 @@ function makeShape(mx = 10, my = 10, radius = 20, sides = 6, rotation) {
 	}
 	for(let i = 0; i < 360; i += (360 / sides)) {
 		points.push({
-			x: (mx + radius * Math.cos(toRadians(i + rotation))),
-			y: (mx + radius * Math.sin(toRadians(i + rotation))),
-		});
+			x: Math.round((mx + radius * Math.cos(toRadians(i + rotation))) * 100) / 100,
+			y: Math.round((mx + radius * Math.sin(toRadians(i + rotation))) * 100) / 100,
+		}); // round to 0.01
 	}
 	return points;
 }

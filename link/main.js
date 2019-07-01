@@ -5,107 +5,90 @@ var two = new Two({
 
 // init anchor
 const a = anchor();
-var main = new Two.Group();
-main.translation.set(two.width / 2, two.height / 2);
-two.add(main);
 
-// build an arrow;
-let icon = {
-	body: [
-		[0,0,0,0,0,0,0,0,0,17,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,18,19,0,15,16,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,2,0,0,0,20,0,21,0,0,0,9,0,0,0,0],
-		[7,0,0,0,1,0,0,0,0,0,0,0,0,0,8,0,0,0,14],
-		[0,0,0,0,0,0,0,3,0,99,0,10,0,0,0,0,0,0,0],
-		[6,0,0,0,5,0,0,0,0,0,0,0,0,0,12,0,0,0,13],
-		[0,0,0,0,4,0,0,0,27,0,28,0,0,0,11,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,25,26,0,22,23,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,24,0,0,0,0,0,0,0,0,0]
-	],
-	link: [
-		[1, 2, 3, 4, 5, 6, 7],
-		[8, 9, 10, 11, 12, 13, 14],
-		[15, 16, 17, 18, 19, 20, 21],
-		[22, 23, 24, 25, 26, 27, 28],
-		[99]
-	]
-};
+// get lb
+let lb = loadbalancer();
+lb.scale = 0.2;
+let rt = router();
+rt.scale = 0.2;
+let sw = netswitch();
+sw.scale = 0.2;
+let fw = firewall();
+fw.scale = 0.2;
 
-// globals
-var gridPoints = [];
-var handles = [];
-var spots = [];
-
-// Build Symbol
-let symbol = new Two.Group();
-let mygrid = mapPath(icon);
-// turn into grid object
-// owns the 'scale'
-// can grid.getPoint(29);
-/*main.add(showGrid(icon, {
-	scale: {x:60, y:60}
-}));*/
-let mySize = getSize(icon);
-
-// Build Border
-// grid.getPoint(29);
-symbol.add(makePath(
-	makeShape(mygrid[4][0].x, mygrid[4][0].y, 15, 4),
-	{
-		close: 1,
-		scale: {x:20, y:20},
-		handles: 0,
-		radius: 40
-	}, {
-		linewidth: 30,
-		stroke: colours['mRed-100'],
-		fill: colours['mRed-500']
-	}
-));
-
-let newOpts = {
-	close: 1,
-	scale: {x:20, y:20},
-	radius: 10,
-	handles: 0
-};
-let newStyle = {
-	fill: colours['mWhite'],
-	stroke: colours['mRed-900'],
-	//linewidth: 14
-};
-mygrid.forEach((path) => {
-	if(path.length > 1) {
-		console.log(path);
-		symbol.add(makePath(path, newOpts, newStyle));
-	}
-});
-
-symbol.scale = 0.20
-symbol.center();
 
 // path1
-let testi = addPath([
-	{x:-18, y:-2},
-	{x:20, y:-2},
-	{x:20, y:-20}
-], {
-	close: 0,
-	radius: 40,
-	start: symbol,
-	end: symbol
+let aPainter = paint();
+aPainter.opts({
+	handles: 0
+}).style({
+	fill: 'none',
+	stroke: colours['mBlue-600'],
+	linewidth: 40
+});
+let aGrid = grid();
+aGrid([
+	[1,0,0,0,2],
+	[0,0,0,0,0],
+	[0,0,9,0,0],
+	[0,0,0,0,0],
+	[4,0,0,0,3]
+]);
+aGrid.painter(aPainter);
+aGrid.x(40);
+aGrid.y(40);
+aGrid.offset(aGrid.get(9)); // obtain center coord
+//aGrid.center(9);
+
+let sym = new Two.Group();
+//sym.add(aGrid.show()); // doesnt work - needs offset applied
+[
+	[1, 2, 3, 4]
+].forEach((link) => {
+	sym.add(aGrid.addPath(link, {
+		close: 1,
+		radius: 40
+		//start: lb,
+		//end: lb
+	}));
 });
 
-// add to main
-main.add(testi);
-main.center();
+let icons = new Two.Group();
+[1, 3].forEach((tag) => {
+	let p = aGrid.get(tag); // obtain center coord
+	let px = aGrid.at(p.x, p.y); // relative to offset!!
+	let moo = lb.clone();
+	moo.translation.set(px.x, px.y);
+	icons.add(moo);
+});
+[2].forEach((tag) => {
+	let p = aGrid.get(tag); // obtain center coord
+	let px = aGrid.at(p.x, p.y); // relative to offset!!
+	let moo = rt.clone();
+	moo.translation.set(px.x, px.y);
+	icons.add(moo);
+});
+[3].forEach((tag) => {
+	let p = aGrid.get(tag); // obtain center coord
+	let px = aGrid.at(p.x, p.y); // relative to offset!!
+	let moo = sw.clone();
+	moo.translation.set(px.x, px.y);
+	icons.add(moo);
+});
+[4].forEach((tag) => {
+	let p = aGrid.get(tag); // obtain center coord
+	let px = aGrid.at(p.x, p.y); // relative to offset!!
+	let moo = fw.clone();
+	moo.translation.set(px.x, px.y);
+	icons.add(moo);
+});
+
+// set main
+let main = new Two.Group();
+main.translation.set(two.width / 2, two.height / 2);
+
+main.add(sym);
+main.add(icons);
+two.add(main);
+
+
