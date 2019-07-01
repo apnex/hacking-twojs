@@ -3,6 +3,10 @@ function grid() {
 		x: 40,
 		y: 40
 	};
+	let offset = {
+		x: 0,
+		y: 0
+	};
 	let pMap = {};
 	let pBody = [];
 	let painter = paint();
@@ -22,14 +26,26 @@ function grid() {
 		return painter.makePath(my.point(points)[0], opts, style, scale);
 	};
 
+	my.addPath = (points, opts, style) => {
+		return painter.addPath(my.point(points)[0], opts, style, scale);
+	};
+
 	my.makePath = (points, opts, style) => {
 		return painter.makePath(points.map((point) => {
 			return my.at(point.x, point.y);
 		}), opts, style, scale);
 	};
 
+	my.offset = (point) => {
+		if(typeof(point) === 'undefined') {
+			return offset;
+		}
+		offset = point;
+		return my;
+	};
+
 	my.at = (x, y) => {
-		return {x: x * scale.x, y: y * scale.y};
+		return {x: (x - offset.x) * scale.x, y: (y - offset.y) * scale.y};
 	};
 
 	my.get = (tag) => {
