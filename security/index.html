@@ -1,0 +1,31 @@
+<html>
+	<head>
+		<script src="./two.min.js"></script>
+		<script src="./colours.js"></script>
+		<script src="./anchor.js"></script>
+		<script src="./grid.js"></script>
+		<script src="./paint.js"></script>
+		<script src="./symbols/loadbalancer.js"></script>
+		<script src="./symbols/router.js"></script>
+		<script src="./symbols/netswitch.js"></script>
+		<script src="./symbols/firewall.js"></script>
+		<script src="./symbols/vm.js"></script>
+		<script src="./symbols/container.js"></script>
+		<script src="./symbols/server.js"></script>
+		<script src="./symbols/nsxbm.js"></script>
+		<script src="./symbols/cluster.js"></script>
+		<script src="./symbols/textBlock.js"></script>
+	</head>
+	<body>
+		<div id="main"></div>
+		<script src="./main.js"></script>
+		<script>
+			window.onfocus = function() {
+				console.log('mooo');
+			        setTimeout(() => {
+			                window.parent.focus();
+			        }, 100);
+			};
+		</script>
+	</body>
+</html>
