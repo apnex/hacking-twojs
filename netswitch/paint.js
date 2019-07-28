@@ -1,31 +1,31 @@
+var a = new anchor();
 function paint() {
-	let opts = optDefaults();
-	let style = styleDefaults();
-
-	function my() {
-		console.log('new painter');
-	}
-
-	my.opts = (value) => {
-		if(typeof(value) === 'undefined') {
-			return opts;
-		}
-		opts = optDefaults(value);
-		return my;
-	};
-
-	my.style = (value) => {
-		if(typeof(value) === 'undefined') {
-			return style;
-		}
-		style = styleDefaults(value);
-		return my;
-	};
-
-	my.makePath = makePath;
-
-	return my;
+	this.op = optDefaults();
+	this.st = styleDefaults();
+	this.main = new Two.Group();
 }
+var my = paint.prototype;
+my.opts = function(value) {
+	if(typeof(value) === 'undefined') {
+		return this.op;
+	}
+	this.op = optDefaults(value);
+	return this;
+};
+my.style = function(value) {
+	if(typeof(value) === 'undefined') {
+		return this.st;
+	}
+	this.st = styleDefaults(value);
+	return this;
+};
+my.canvas = function() {
+	return this.main;
+};
+
+my.makePath = makePath;
+my.addPath = addPath;
+my.addIcon = addIcon;
 
 function optDefaults(opt = {}, gridopts) { // merge
 	if(typeof(opt.start) === 'undefined') {
@@ -75,6 +75,42 @@ function makePath(points, o, s, scale) {
 	path.linewidth = style.linewidth;
 	path.stroke = style.stroke;
 	path.fill = style.fill;
+	//path.dashes[0] = 20;
+	return path;
+}
+
+function addPath(points, o, s, scale) {
+	// merge current values with provided values
+	let opt = Object.assign({...this.opts()}, o); // deep merge/copy of keys
+	let style = Object.assign({...this.style()}, s);
+	let newPoints = a.roundCorners(points, opt.radius, opt.close);
+
+	//let pGroup = new Two.Group();
+        let path = new Two.Path(a.toAnchors(newPoints, 1), false, false, true);
+	path.linewidth = style.linewidth;
+	path.stroke = style.stroke;
+	path.fill = style.fill;
+	path.cap = 'round';
+	if(opt.id) {
+		path.id = opt.id;
+	}
+	path.cap = 'round';
+	//path.dashes[0] = style.dashes; // testing
+	/*
+	pGroup.add(path);
+	if(opt.start) {
+		let icon = opt.start.clone()
+		icon.translation.set(newPoints[0].x, newPoints[0].y);
+		pGroup.add(icon);
+	}
+	if(opt.end) {
+		let icon = opt.end.clone()
+		icon.translation.set(newPoints[newPoints.length - 1].x, newPoints[newPoints.length - 1].y);
+		pGroup.add(icon);
+	}
+	return pGroup;
+	*/
+	this.main.add(path);
 	return path;
 }
 
@@ -114,4 +150,14 @@ function showHandles(points, opt, scale) {
 	handleGroup.add(rGroup);
 	handleGroup.add(hGroup);
 	return handleGroup;
+}
+
+function addIcon(grid, icon, tags = []) {
+	tags.forEach((tag) => {
+		grid.getTags(tag).forEach((cell) => {
+			let symbol = icon.clone();
+			symbol.translation.set(cell.x, cell.y);
+			this.main.add(symbol);
+		});
+	});
 }

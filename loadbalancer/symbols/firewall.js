@@ -1,17 +1,7 @@
-function firewall() {
-	// setup painter (default style and line-routing)
-	let myPainter = paint();
-	myPainter.opts({
-		handles: 0
-	}).style({
-		fill: colours['mWhite'],
-		stroke: colours['mRed-900'],
-		linewidth: 10
-	});
-
+function firewall(scale = 1) {
 	// build grid (coordinate structure)
-	let myGrid = grid();
-	myGrid([
+	let aGrid = grid();
+	aGrid([
 		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 		[0,13,0,0,0,0,0,0,0,0,14,17,0,0,0,0,0,18,0],
@@ -32,28 +22,9 @@ function firewall() {
 		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 	]);
-	myGrid.painter(myPainter);
-	myGrid.x(20);
-	myGrid.y(20);
-	myGrid.offset(myGrid.get(99));
-
-	// build grid
-	let symbol = new Two.Group();
-	//symbol.add(myGrid.show());
-
-	// draw border
-	let mypoint = myGrid.get(99); // obtain center coord
-	symbol.add(myGrid.makePath(
-		makeShape(mypoint.x, mypoint.y, 15, 4),
-		{
-			close: 1,
-			radius: 40
-		}, {
-		linewidth: 30,
-			stroke: colours['mRed-100'],
-			fill: colours['mRed-500']
-		}
-	));
+	aGrid.x(10);
+	aGrid.y(10);
+	aGrid.offset(aGrid.get(99));
 
 	// draw paths
 	[
@@ -65,11 +36,48 @@ function firewall() {
 		[21, 22, 23, 24],
 		[25, 26, 27, 28]
 	].forEach((link) => {
-		symbol.add(myGrid.path(link, {
+		aGrid.addPath(link, {
 			close: 1,
 			radius: 10
-		}));
+		}, {
+			fill: colours['mOrange-400'],
+			stroke: colours['mOrange-900'],
+			linewidth: 6
+		});
 	});
 
+	// build grid
+	let bGrid = grid();
+	bGrid([
+		[1,0,2],
+		[0,9,0],
+		[4,0,3]
+	]);
+	bGrid.x(120);
+	bGrid.y(120);
+	bGrid.offset(bGrid.get(9));
+	//bGrid.center();
+	//bGrid.show();
+
+	// draw path
+	[
+		[1, 2, 3, 4]
+	].forEach((link) => {
+		bGrid.addPath(link, {
+			close: 1,
+			radius: 20
+		}, {
+			fill: colours['mOrange-100'],
+			stroke: colours['mOrange-900'],
+			linewidth: 15
+		});
+	});
+
+	// assemble layers
+	bGrid.addIcon(aGrid.main(), [9]);
+
+	// return group
+	let symbol = bGrid.main();
+	symbol.scale = scale;
 	return symbol;
 }

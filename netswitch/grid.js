@@ -8,26 +8,42 @@ function grid() {
 		y: 0
 	};
 	let pMap = {};
+	let pMaps = {};
 	let pBody = [];
-	let painter = paint();
+	let painter = new paint();
 
+	let setTag = (point, tag) => {
+		if(tag > 0) {
+			pMap[tag] = point;
+			if(typeof(pMaps[tag]) === 'undefined') {
+				pMaps[tag] = [];
+			}
+			pMaps[tag].push(point);
+		}
+	};
 	function my(body) {
 		pBody = body;
 		body.forEach((row, y) => { // build points
-			row.forEach((cell, x) => {
-				if(cell > 0) {
-					pMap[cell] = {x, y};
-				}
+			row.forEach((tag, x) => {
+				setTag({x, y}, tag);
 			});
 		});
 	}
+	my.setTag = setTag;
+	my.main = () => {
+		return painter.canvas();
+	};
 
 	my.path = (points, opts, style) => {
-		return painter.makePath(my.point(points)[0], opts, style, scale);
+		return painter.makePath(my.points(points)[0], opts, style, scale);
 	};
 
 	my.addPath = (points, opts, style) => {
-		return painter.addPath(my.point(points)[0], opts, style, scale);
+		return painter.addPath(my.points(points)[0], opts, style, scale);
+	};
+
+	my.addIcon = (icon, tags) => {
+		return painter.addIcon(my, icon, tags);
 	};
 
 	my.makePath = (points, opts, style) => {
@@ -52,6 +68,20 @@ function grid() {
 		return {x: pMap[tag].x, y: pMap[tag].y};
 	};
 
+	my.getTag = (tag) => {
+		return my.at(pMap[tag].x, pMap[tag].y);
+	};
+
+	my.getTags = (tag) => {
+		if(pMaps[tag]) {
+			return pMaps[tag].map((cell) => {
+				return my.at(cell.x, cell.y);
+			});
+		} else {
+			return [];
+		}
+	};
+
 	my.painter = function(value) {
 		if(typeof(value) === 'undefined') {
 			return painter;
@@ -61,7 +91,7 @@ function grid() {
 	};
 
 	my.show = () => {
-		return showGrid(pBody, {scale});
+		return showGrid(pBody, {scale, offset});
 	};
 
 	my.x = function(value) {
@@ -80,7 +110,7 @@ function grid() {
 		return my;
 	};
 
-	my.point = function(points) {
+	my.points = function(points) {
 		let paths = [];
 		paths.push(points.reduce((path, cell) => {
 			if(pMap[cell]) {
@@ -119,7 +149,7 @@ function flipy(body) {
 }
 
 // show grid points + lines
-function showGrid(grid, opt) {
+function showGrid(grid, opt, my) {
 	let gridGroup = new Two.Group();
 	gridGroup.add(showGridLines(grid, opt));
 	gridGroup.add(showGridPoints(grid, opt));
@@ -131,7 +161,10 @@ function showGridPoints(body, opt) {
 	let gGroup = new Two.Group();
 	body.forEach((row, y) => { // build points
 		row.forEach((cell, x) => {
-			let point = {x: x * opt.scale.x, y: y * opt.scale.y};
+			let point = {
+				x: (x - opt.offset.x) * opt.scale.x,
+				y: (y - opt.offset.y) * opt.scale.y
+			};
 			let handle = new Two.Circle(point.x, point.y, opt.scale.x / 20);
 			handle.fill = colours['mBlue-100'];
 			handle.stroke = colours['mBlue-300'];
@@ -147,11 +180,16 @@ function showGridLines(body, opt) {
 	let size = getSize(body);
 	let lGroup = new Two.Group();
 	for(y = 0; y < size.y; y++) { // y-axis
-		let pathPoints = [
-			{x: -1 * opt.scale.x, y: y * opt.scale.y},
-			{x: size.x * opt.scale.x, y: y * opt.scale.y}
-		];
-		let path = new Two.Path(a.toAnchors(pathPoints), false, false, true);
+		let points = [
+			{x: -1, y},
+			{x: size.x, y}
+		].map((point) => {
+			return {
+				x: (point.x - opt.offset.x) * opt.scale.x,
+				y: (point.y - opt.offset.y) * opt.scale.y
+			}
+		});
+		let path = new Two.Path(a.toAnchors(points), false, false, true);
 		path.stroke = colours['mGrey-300'];
 		path.linewidth = opt.scale.x / 30;
 		path.opacity = 0.5;
@@ -159,11 +197,16 @@ function showGridLines(body, opt) {
 		lGroup.add(path);
 	}
 	for(let x = 0; x < size.x; x++) { // x-axis
-		let pathPoints = [
-			{x: x * opt.scale.x, y: -1 * opt.scale.y},
-			{x: x * opt.scale.x, y: size.y * opt.scale.y}
-		];
-		let path = new Two.Path(a.toAnchors(pathPoints), false, false, true);
+		let points = [
+			{x, y: -1},
+			{x, y: size.y}
+		].map((point) => {
+			return {
+				x: (point.x - opt.offset.x) * opt.scale.x,
+				y: (point.y - opt.offset.y) * opt.scale.y
+			}
+		});
+		let path = new Two.Path(a.toAnchors(points), false, false, true);
 		path.stroke = colours['mGrey-300'];
 		path.linewidth = opt.scale.x / 30;
 		path.opacity = 0.5;
