@@ -453,7 +453,10 @@ function multi(scale = 1, astyle) {
 
 	// assemble layers
 	bGrid.addIcon(aGrid.main(), [9]);
-	bGrid.addIcon(firewall(0.4), [1]);
+	bGrid.addIcon(firewall(0.4, {
+		symbol: 'Orange',
+		shape: 'Orange'
+	}), [1]);
 	bGrid.addIcon(loadbalancer(0.4, {
 		symbol: 'Light-Blue',
 		shape: 'Light-Blue'
@@ -983,7 +986,10 @@ function tenant(scale = 1, props) {
 	});
 
 	// add icons
-	bGrid.addIcon(firewall(0.4), [9,12]);
+	bGrid.addIcon(firewall(0.4, {
+		symbol: 'Orange',
+		shape: 'Orange'
+	}), [9,12]);
 	//bGrid.addIcon(vm(0.4), [10,13]);
 	bGrid.addIcon(gcp(0.4), [10,13]);
 	bGrid.addIcon(port(1), [1,8,11]);
